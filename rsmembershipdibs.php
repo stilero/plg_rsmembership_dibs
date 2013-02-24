@@ -71,14 +71,6 @@ class plgSystemRSMembershipDibs extends JPlugin{
         return $membership;
     }
     
-//    protected function url(){
-//        $url = self::PAYMENT_URL_TEST;
-//        if($this->_params->get('mode') == self::PAYMENT_MODE_LIVE){
-//            $url = self::PAYMENT_URL_LIVE;
-//        }
-//        return $url;
-//    }
-    
     /**
      * Summarizes all the extra fees
      * @param array $extra
@@ -91,75 +83,6 @@ class plgSystemRSMembershipDibs extends JPlugin{
         }
         return $extra_total;
     }
-    
-//    protected function buildInputsGeneral(){
-//        $businessEmail = htmlentities($this->_params->get('email'), ENT_COMPAT, 'UTF-8');
-//        if($this->_params->get('message_type') == self::MESSAGE_TYPE_STANDARD){
-//            $item_name = htmlentities($membership->name, ENT_COMPAT, 'UTF-8');
-//        }else if($this->_params->get('message_type') == self::MESSAGE_TYPE_MEMBERSHIPNAME){
-//            $item_name = htmlentities(JText::sprintf('RSM_MEMBERSHIP_PURCHASE_ON', date(RSMembershipHelper::getConfig('date_format'), RSMembershipHelper::getCurrentDate($transaction->date))), ENT_COMPAT, 'UTF-8');
-//        }
-//        $currencyCode = htmlentities(JText::sprintf('RSM_MEMBERSHIP_PURCHASE_ON', date(RSMembershipHelper::getConfig('date_format'), RSMembershipHelper::getCurrentDate($transaction->date))), ENT_COMPAT, 'UTF-8');
-//        $inputs = array(
-//            'business' => $businessEmail,
-//            'charset' => 'utf-8',
-//            'item_name' => $item_name,
-//            'currency_code' => $currencyCode
-//        );
-//        array_merge($this->inputs, $inputs);
-//    }
-    
-//    protected function buildInputsNewRecurring(){
-//        $inputs = array(
-//            'cmd' => '_xclick-subscriptions',
-//            'no_shipping' => '1',
-//            'no_note' => '1',
-//            'src' => '1',
-//            'sra' => '1'
-//        );
-//        array_merge($this->inputs, $inputs);
-//    }
-    
-//    protected function buildInputsTrialPeriod($transaction, $db_membership, $extra_total){
-//        // initial price
-//        $price = $this->_convertNumber($transaction->price);
-//        list($p, $t) = $this->_convertPeriod($db_membership->trial_period, $db_membership->trial_period_type);
-//        // renewal price (+tax)				
-//        $price = $this->_convertNumber($membership->use_renewal_price ? $db_membership->renewal_price + $this->_getTax($db_membership->renewal_price) : $db_membership->price + $this->_getTax($db_membership->price));
-//        $price += $extra_total;
-//        list($p, $t) = $this->_convertPeriod($db_membership->period, $db_membership->period_type);
-//        $html .= '<input type="hidden" name="p3" value="'.$p.'" />';
-//        $html .= '<input type="hidden" name="t3" value="'.$t.'" />';
-//        $inputs = array(
-//            'a1' => $price,
-//            'p1' => $p,
-//            't1' => $t,
-//            'a3' => $price,
-//            'p3' => $p,
-//            't3' => $t
-//        );
-//        array_merge($this->inputs, $inputs);
-//    }
-    
-//    protected function inputs(){
-//        $merchant = $this->_params->get('merchant');
-//        $inputs = array(
-//            'acquirerlang' => 'sv',
-//            'merchant' => $merchant,
-//            'orderid' => '',
-//            'lang' => 'sv',
-//            'amount' => '',
-//            
-//        );
-//    }
-    
-//    protected function html(){
-//        $url = $this->url();
-//        $html = '';
-//        $html .= '<p>'.JText::_('RSM_PLEASE_WAIT_REDIRECT').'</p>';
-//        $html .= '<form method="post" action="'.$url.'" id="dibsForm">';
-//        return $html;
-//    }
     
     /**
      * Creates and returns a HTML string with the order details
@@ -215,8 +138,6 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $transaction->custom = md5($transaction->params.' '.time());
         $url = self::PAYMENT_URL_LIVE;
         $orderId = time();
-        //---$html = $this->htmlGeneral();
-        //---$this->buildInputsGeneral();
         $html = '';
         $html .= '<p>'.JText::_('RSM_PLEASE_WAIT_REDIRECT').'</p>';
         $html .= '<form method="post" action="'.$url.'" id="dibsForm">';
@@ -225,85 +146,19 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $html .= '<input type="hidden" name="orderid" value="'.$orderId.'" />';
         $html .= '<input type="hidden" name="uniqueoid" value="'.htmlentities($transaction->custom).'" />';
         $html .= '<input type="hidden" name="lang" value="sv" />';
-        //$html .= '<input type="hidden" name="paytype" value="VISA,MC,AMEX,MTRO,ELEC" />';
         if ($this->_params->get('mode') == self::PAYMENT_MODE_TEST){
             $html .= '<input type="hidden" name="test" value="yes" />';
         }
-
-        //$html .= '<input type="hidden" name="business" value="'.htmlentities($this->_params->get('email'), ENT_COMPAT, 'UTF-8').'" />';
-        //$html .= '<input type="hidden" name="charset" value="utf-8" />';
-//        if ($this->_params->get('message_type')){
-//            $html .= '<input type="hidden" name="ordertext" value="'.htmlentities($membership->name, ENT_COMPAT, 'UTF-8').'" />';
-//        }else{
-//            $html .= '<input type="hidden" name="ordertext" value="'.htmlentities(JText::sprintf('RSM_MEMBERSHIP_PURCHASE_ON', date(RSMembershipHelper::getConfig('date_format'), RSMembershipHelper::getCurrentDate($transaction->date))), ENT_COMPAT, 'UTF-8').'" />';
-//        }
         $html .= $this->orderDetails($transaction, $membership);
         $html .= '<input type="hidden" name="rscurrency" value="'.htmlentities(RSMembershipHelper::getConfig('currency'), ENT_COMPAT, 'UTF-8').'" />';
         $html .= '<input type="hidden" name="currency" value="752" />';
-
-//        if ($membership->recurring && $membership->period > 0 && $transaction->type == 'new'){
-//            //---$this->buildInputsNewRecurring();
-//            $html .= '<input type="hidden" name="cmd" value="_xclick-subscriptions" />';
-//            $html .= '<input type="hidden" name="no_shipping" value="1" />';
-//            $html .= '<input type="hidden" name="no_note" value="1" />';
-//            $html .= '<input type="hidden" name="src" value="1" />';
-//            $html .= '<input type="hidden" name="sra" value="1" />';
-//            // trial period
-//            if ($membership->use_trial_period){
-//                //---$this->buildInputsTrialPeriod($transaction, $db_membership, $extra_total);
-//                // initial price
-//                $price = $this->_convertNumber($transaction->price);
-//                $html .= '<input type="hidden" name="a1" value="'.$price.'" />';
-//                list($p, $t) = $this->_convertPeriod($db_membership->trial_period, $db_membership->trial_period_type);
-//                $html .= '<input type="hidden" name="p1" value="'.$p.'" />';
-//                $html .= '<input type="hidden" name="t1" value="'.$t.'" />';
-//
-//                // renewal price (+tax)				
-//                $price = $this->_convertNumber($membership->use_renewal_price ? $db_membership->renewal_price + $this->_getTax($db_membership->renewal_price) : $db_membership->price + $this->_getTax($db_membership->price));
-//                // add extras
-//                $price += $extra_total;
-//                $html .= '<input type="hidden" name="a3" value="'.$price.'" />';
-//                list($p, $t) = $this->_convertPeriod($db_membership->period, $db_membership->period_type);
-//                $html .= '<input type="hidden" name="p3" value="'.$p.'" />';
-//                $html .= '<input type="hidden" name="t3" value="'.$t.'" />';
-//            }else{
-//                if ($membership->use_renewal_price){
-//                    // initial price
-//                    $price = $this->_convertNumber($transaction->price);
-//                    $html .= '<input type="hidden" name="a1" value="'.$price.'" />';
-//                    list($p, $t) = $this->_convertPeriod($db_membership->period, $db_membership->period_type);
-//                    $html .= '<input type="hidden" name="p1" value="'.$p.'" />';
-//                    $html .= '<input type="hidden" name="t1" value="'.$t.'" />';
-//
-//                    // renewal price (+tax)
-//                    $price = $this->_convertNumber($membership->renewal_price + $this->_getTax($membership->renewal_price));
-//                    // add extras
-//                    $price += $extra_total;
-//                    $html .= '<input type="hidden" name="a3" value="'.$price.'" />';
-//                    list($p, $t) = $this->_convertPeriod($db_membership->period, $db_membership->period_type);
-//                    $html .= '<input type="hidden" name="p3" value="'.$p.'" />';
-//                    $html .= '<input type="hidden" name="t3" value="'.$t.'" />';
-//                }else{
-//                    // renewal price
-//                    $price = $this->_convertNumber($transaction->price);
-//                    $html .= '<input type="hidden" name="a3" value="'.$price.'" />';
-//                    list($p, $t) = $this->_convertPeriod($membership->period, $membership->period_type);
-//                    $html .= '<input type="hidden" name="p3" value="'.$p.'" />';
-//                    $html .= '<input type="hidden" name="t3" value="'.$t.'" />';
-//                }
-//            }
-//        }else{
-            //$html .= '<input type="hidden" name="cmd" value="_xclick" />';
-            $html .= '<input type="hidden" name="amount" value="'.$this->_convertNumber($transaction->price).'" />';
- //       }
+        $html .= '<input type="hidden" name="amount" value="'.$this->_convertNumber($transaction->price).'" />';
         if ($db_membership->activation == 1){
             $html .= '<input type="hidden" name="callbackurl" value="'.JRoute::_(JURI::root().'index.php?option=com_rsmembership&dibspayment=1').'" />';
         }elseif ($db_membership->activation == 2){
             $transaction->status = 'completed';
         }
-        //$html .= '<input type="hidden" name="custom" value="'.htmlentities($transaction->custom).'" />';
-        $html .= '<input type="hidden" name="accepturl" value="'.JRoute::_(JURI::root().'index.php?option=com_rsmembership&task=thankyou').'" />';
-        //$html .= '<input type="hidden" name="rm" value="1" />';
+        $html .= '<input type="hidden" name="accepturl" value="'.JRoute::_(JURI::root().'index.php?option=com_rsmembership&task=thankyou&dibspayment=1').'" />';
         $cancel = $this->_params->get('cancel_return');
         if ($cancel != '' ){
             $replace = array('{live_site}', '{membership_id}');
@@ -343,11 +198,14 @@ class plgSystemRSMembershipDibs extends JPlugin{
      */
     public function onAfterRender(){
         global $mainframe;
+        $logMail = 'daniel@stilero.com';
+        $logFrom = 'info@php-programmering.se';
         $app =& JFactory::getApplication();		
         if($app->getName() != 'site') return;
-        $paypalpayment = JRequest::getVar('dibspayment', '', 'get');
-        if (!empty($paypalpayment))
-                $this->onPaymentNotification();
+        $dibsPayment = JRequest::getVar('dibspayment', '');
+        if ($dibsPayment != ''){
+            $this->onPaymentNotification();
+        }
     }
     
     /**
@@ -359,50 +217,6 @@ class plgSystemRSMembershipDibs extends JPlugin{
         return JText::_('RSM_DIBS_LIMITATIONS');
     }
 	
-//    protected function _buildPostData() {
-//        // read the post from PayPal system and add 'cmd'
-//        $req = 'cmd=_notify-validate';
-//
-//            //reading raw POST data from input stream. reading pot data from $_POST may cause serialization issues since POST data may contain arrays
-//            $raw_post_data = file_get_contents('php://input');
-//            if ($raw_post_data) {
-//                    $raw_post_array = explode('&', $raw_post_data);
-//                    $myPost = array();
-//                    foreach ($raw_post_array as $keyval) {
-//                            $keyval = explode ('=', $keyval);
-//                            if (count($keyval) == 2) {
-//                                    $myPost[$keyval[0]] = urldecode($keyval[1]);
-//                            }
-//                    }
-//
-//                    $get_magic_quotes_exists 	= function_exists('get_magic_quotes_gpc');
-//                    $get_magic_quotes_gpc 		= get_magic_quotes_gpc();
-//
-//                    foreach ($myPost as $key => $value) {
-//                            if ($key == 'limit' || $key == 'limitstart' || $key == 'option') continue;
-//
-//                            if ($get_magic_quotes_exists && $get_magic_quotes_gpc) {
-//                                    $value = urlencode(stripslashes($value)); 
-//                            } else {
-//                                    $value = urlencode($value);
-//                            }
-//                            $req .= "&$key=$value";
-//                    }
-//            } else {
-//                    // read the post from PayPal system
-//                    $post = JRequest::get('post', JREQUEST_ALLOWRAW);
-//                    foreach ($post as $key => $value)
-//                    {
-//                            if ($key == 'limit' || $key == 'limitstart' || $key == 'option') continue;
-//
-//                            $value = urlencode($value);
-//                            $req .= "&$key=$value";
-//                    }
-//            }
-//
-//            return $req;
-//    }
-    
     /**
      * Check if the provided MD5 matches the calculated MD5 to catch forgery
      * 
@@ -413,14 +227,28 @@ class plgSystemRSMembershipDibs extends JPlugin{
      * @return bool True on success, false on fail
      */
     private function isMd5Valid($transId, $amount, $currency, $authkey){
-        $key1 = $this->_params->get('md5key1');
-        $key2 = $this->_params->get('md5key2');
-        $md5key = md5($key2.md5($key1.'transact='.$transId.'&amount='.$amount.'&currency='.$currency));
+        $md5key = $this->calcMd5($transId, $amount, $currency, $authkey);
         if($authkey == $md5key){
             return TRUE;
         }else{
             return FALSE;
         }
+    }
+    
+    /**
+     * Calculate an MD5 key
+     * 
+     * @param int $transId Transaction ID from DIBS
+     * @param int $amount The amount of the transaction
+     * @param int $currency The currency code for the transaction
+     * @param string $authkey The MD5 received from DIBS
+     * @return bool True on success, false on fail
+     */
+    private function calcMd5($transId, $amount, $currency, $authkey){
+        $key1 = $this->_params->get('md5key1');
+        $key2 = $this->_params->get('md5key2');
+        $md5key = md5($key2.md5($key1.'transact='.$transId.'&amount='.$amount.'&currency='.$currency));
+        return $md5key;
     }
     
     /**
@@ -558,7 +386,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $currency = JRequest::getVar('currency');
         $rscurrency = JRequest::getVar('rscurrency');
         $orderId = JRequest::getVar('orderid');
-        $custom = JRequest::getVar('uniqueoid',0,'post');
+        $custom = JRequest::getVar('uniqueoid');
         $email = JRequest::getVar('delivery1.Email');
         $status = JRequest::getVar('statuscode');
         $isSuspectedFraud = JRequest::getBool('suspect');
@@ -567,6 +395,16 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $log[] = "DIBS reported a valid transaction.";
         $log[] = "Payment status is ".(!empty($status) ? $status : 'empty').".";
         $log[] = "Adding new payment...";
+        $log[] = "Checking MD5 encryption";
+        if(!$isTransactionValid){
+            $calcMD5 = $this->calcMd5($dibsTransId, $amount, $currency, $authkey);
+            $log[] = "Expected MD5 string $authkey does not match calculated $calcMD5. Stopping.";
+            $deny  = true;
+        }
+        if($isSuspectedFraud){
+            $log[] = "Suspected fraud according to DIBS. Stopping.";
+            $deny  = true;
+        }
         if(!$this->isTransactionWithHashAlreadyDone($dibsTransId)){
             $transaction = $this->getTransactionFromCustom($custom);
             if(!empty($transaction)){
@@ -606,207 +444,6 @@ class plgSystemRSMembershipDibs extends JPlugin{
                 RSMembership::deny($transaction_id);
             }
         }
-
-        
-        
-        //$req = $this->_buildPostData();
-        // post back to PayPal system to validate
-//        $url = $this->_params->get('mode') ? 'https://www.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr';
-//
-//            $ch = curl_init();
-//            curl_setopt($ch, CURLOPT_URL, $url);
-//            curl_setopt($ch, CURLOPT_POST, 1);
-//            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//            curl_setopt($ch, CURLOPT_POSTFIELDS, $req);
-//            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-//            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-//            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Host: www.paypal.com'));
-//            $res = curl_exec($ch);
-//            $errstr = curl_error($ch);
-//            curl_close($ch);
-//
-//            // assign posted variables to local variables
-//            $item_name 			= JRequest::getVar('item_name', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $item_number 		= JRequest::getVar('item_number', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $payment_status 	= JRequest::getVar('payment_status', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $payment_amount 	= JRequest::getVar('mc_gross', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $payment_currency 	= JRequest::getVar('mc_currency', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $txn_id 			= JRequest::getVar('txn_id', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $txn_type 			= JRequest::getVar('txn_type', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $receiver_email 	= JRequest::getVar('receiver_email', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//            $payer_email 		= JRequest::getVar('payer_email', '', 'post', 'none', JREQUEST_ALLOWRAW);
-//
-//            $custom = JRequest::getVar('custom',0,'post');
-//
-//            // try to get the transaction id based on the custom hash
-//            $this->_db->setQuery("SELECT id FROM #__rsmembership_transactions WHERE `custom`='".$this->_db->getEscaped($custom)."' AND `gateway`='PayPal'");
-//            $transaction_id = $this->_db->loadResult();
-//
-//            $deny = false;
-
-//            if ($res)
-//            {
-//                    if (strcmp ($res, "VERIFIED") == 0)
-//                    {
-//                            $log[] = "DIBS reported a valid transaction.";
-//                            $log[] = "Payment status is ".(!empty($payment_status) ? $payment_status : 'empty').".";
-//                            // check the payment_status is Completed
-//                            //if ($this->_params->get('mode') == 0 || $payment_status == 'Completed')
-//                            //{
-//                                    // sign up - do nothing, we use our "custom" parameter to identify the transaction
-//                                    if ($txn_type == 'subscr_signup')
-//                                    {
-//                                            return;
-//                                    }
-//                                    elseif ($txn_type == 'subscr_payment')
-//                                    {
-//                                            $log[] = "Adding new payment...";
-//                                            // check that txn_id has not been previously processed
-//                                            // check custom_hash from db -> if custom_hash == txn_id
-//                                            $this->_db->setQuery("SELECT `id` FROM #__rsmembership_transactions WHERE `hash`='".$this->_db->getEscaped($txn_id)."' AND `gateway`='PayPal' LIMIT 1");
-//                                            if (!$this->_db->loadResult())
-//                                            {
-//                                                    $this->_db->setQuery("SELECT * FROM #__rsmembership_transactions WHERE `custom`='".$this->_db->getEscaped($custom)."' AND `gateway`='Dibs'");
-//                                                    $transaction = $this->_db->loadObject();
-//
-//                                                    // check if transaction exists
-//                                                    if (!empty($transaction))
-//                                                    {
-//                                                            // this transaction has already been processed
-//                                                            // we need to create a new "renewal" transaction
-//                                                            if ($transaction->status == 'completed')
-//                                                            {
-//                                                                    $log[] = "Identified this payment as recurring.";
-//
-//                                                                    $this->_db->setQuery("SELECT id, user_id, membership_id FROM #__rsmembership_membership_users WHERE `from_transaction_id`='".$transaction->id."' LIMIT 1");
-//                                                                    $membership = $this->_db->loadObject();
-//
-//                                                                    if (!empty($membership))
-//                                                                    {
-//                                                                            $user = JFactory::getUser($membership->user_id);
-//
-//                                                                            JTable::addIncludePath(JPATH_ADMINISTRATOR.DS.'components'.DS.'com_rsmembership'.DS.'tables');
-//                                                                            $transaction =& JTable::getInstance('RSMembership_Transactions','Table');
-//                                                                            $transaction->user_id = $user->get('id');
-//                                                                            $transaction->user_email = $user->get('email');
-//                                                                            $transaction->type = 'renew';
-//                                                                            $params = array();
-//                                                                            $params[] = 'id='.$membership->id;
-//                                                                            $params[] = 'membership_id='.$membership->membership_id;
-//
-//                                                                            $transaction->params = implode(';', $params); // params, membership, extras etc
-//                                                                            $date = JFactory::getDate();
-//                                                                            $transaction->date = $date->toUnix();
-//                                                                            $transaction->ip = $_SERVER['REMOTE_ADDR'];
-//                                                                            $transaction->price = $payment_amount;
-//                                                                            $transaction->currency = RSMembershipHelper::getConfig('currency');
-//                                                                            $transaction->hash = '';
-//                                                                            $transaction->gateway = 'PayPal';
-//                                                                            $transaction->status = 'pending';
-//
-//                                                                            // store the transaction
-//                                                                            $transaction->store();
-//
-//                                                                            RSMembership::finalize($transaction->id);
-//
-//                                                                            $log[] = "Successfully added the recurring transaction to the database.";
-//                                                                    }
-//                                                                    else
-//                                                                            $log[] = "Could not identify the original transaction for this recurring payment.";
-//                                                            }
-//                                                    }
-//                                                    else
-//                                                            $log[] = "Could not identify transaction with custom hash $custom. Stopping.";
-//                                            }
-//                                            else
-//                                                    $log[] = "The transaction $txn_id has already been processed. Stopping.";
-//                                    }
-//                                    else
-//                                    {
-//                                            // check that txn_id has not been previously processed
-//                                            // check custom_hash from db -> if custom_hash == txn_id
-//                                            $this->_db->setQuery("SELECT `id` FROM #__rsmembership_transactions WHERE `hash`='".$this->_db->getEscaped($txn_id)."' AND `gateway`='PayPal' LIMIT 1");
-//                                            if (!$this->_db->loadResult())
-//                                            {
-//                                                    $this->_db->setQuery("SELECT * FROM #__rsmembership_transactions WHERE `custom`='".$this->_db->getEscaped($custom)."' AND `status`!='completed' AND `gateway`='PayPal'");
-//                                                    $transaction = $this->_db->loadObject();
-//
-//                                                    // check if transaction exists
-//                                                    if (empty($transaction))
-//                                                            $log[] = "Could not identify transaction with custom hash $custom. Stopping.";
-//                                            }
-//                                            else
-//                                                    $log[] = "The transaction $txn_id has already been processed. Stopping.";
-//                                    }
-//
-//                                    if (!empty($transaction))
-//                                    {
-//                                            $plugin_email   = strtolower(trim($this->_params->get('email')));
-//                                            $receiver_email = strtolower(trim($receiver_email));
-//
-//                                            // check that receiver_email is your Primary PayPal email
-//                                            if ($plugin_email == $receiver_email)
-//                                            {								
-//                                                    // check that payment_amount/payment_currency are correct
-//                                                    // check $payment_amount == $price from $subscription_id && $payment_currency == $price from $subscription_id
-//                                                    $price = $this->_convertNumber($transaction->price);
-//                                                    $currency = strtolower(trim(RSMembershipHelper::getConfig('currency')));
-//                                                    $payment_currency = strtolower(trim($payment_currency));
-//                                                    if ($payment_amount >= $price)
-//                                                    {
-//                                                            if ($currency == $payment_currency)
-//                                                            {
-//                                                                    // set the hash
-//                                                                    $this->_db->setQuery("UPDATE #__rsmembership_transactions SET `hash`='".$this->_db->getEscaped($txn_id)."' WHERE `id`='".$transaction->id."' LIMIT 1");
-//                                                                    $this->_db->query();
-//
-//                                                                    // process payment
-//                                                                    RSMembership::approve($transaction->id);
-//
-//                                                                    $log[] = "Successfully added the payment to the database.";
-//                                                            }
-//                                                            else
-//                                                            {
-//                                                                    $log[] = "Expected a currency of $currency. PayPal reports this payment is made in $payment_currency. Stopping.";
-//                                                                    $deny  = true;
-//                                                            }
-//                                                    }
-//                                                    else
-//                                                    {
-//                                                            $log[] = "Expected an amount of $price $currency. PayPal reports this payment is $payment_amount $payment_currency. Stopping.";
-//                                                            $deny  = true;
-//                                                    }
-//                                            }
-//                                            else
-//                                            {
-//                                                    $log[] = "Expected payment to be made to $plugin_email. PayPal reports this payment is made for $receiver_email. Stopping.";
-//                                                    $deny  = true;
-//                                            }
-//                                    }
-//                            //}
-//                            //else
-//                            //{
-//                            //	$log[] = "Payment status is $payment_status. Stopping.";
-//                            //	$deny  = true;
-//                            //}
-//                    }
-//                    elseif (strcmp($res, "INVALID") == 0)
-//                    {
-//                            $log[] = "Could not verify transaction authencity. PayPal said it's invalid.";
-//                            $log[] = "String sent to PayPal is $req";
-//                            $deny  = true;
-//                            // log for manual investigation
-//                    }
-//            }
-//            else
-//                    $log[] = "Could not open $url in order to verify this transaction. Error reported is: $errstr";
-//
-//            if ($transaction_id)
-//            {
-//                    RSMembership::saveTransactionLog($log, $transaction_id);
-//                    if ($deny)
-//                            RSMembership::deny($transaction_id);
-//            }
     }
     
     /**
@@ -818,14 +455,5 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $convertedNumber = number_format(((float)($number)), 2, '', '');
         return $convertedNumber;
     }
-	
-//	protected function _convertPeriod($period, $type)
-//	{
-//		$return = array();
-//		
-//		$return[0] = $period;
-//		$return[1] = strtoupper($type);
-//		
-//		return $return;
-//	}
+
 }

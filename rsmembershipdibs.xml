@@ -58,7 +58,7 @@
                     </field>
                     <field 
                         name="lang" 
-                        type="select" 
+                        type="radio" 
                         default="sv" 
                         label="RSM_DIBS_LANG" 
                         description="RSM_DIBS_LANG_DESC"
