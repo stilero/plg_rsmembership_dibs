@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<install version="1.5.9" type="plugin" group="system" method="upgrade">
+	<name>System - RSMembership! - DIBS</name>
+	<author>Daniel Eliasson</author>
+	<creationDate>February 2013</creationDate>
+	<copyright>Copyright (C) 2013 stilero.com. All rights reserved.</copyright>
+	<license>GPLv2.0</license>
+	<authorEmail>joomla@stilero.com</authorEmail>
+	<authorUrl>www.stilero.com</authorUrl>
+	<version>1.0.0</version>
+	<description>RSM_DIBS_PLUGIN_DESC</description>
+	<files>
+		<filename plugin="rsmembershipdibs">rsmembershipdibs.php</filename>
+	</files>
+	<languages>
+		<language tag="en-GB">en-GB.plg_system_rsmembershipdibs.ini</language>
+		<language tag="sv-SE">sv-SE.plg_system_rsmembershipdibs.ini</language>
+	</languages>
+	<params>
+		<param type="text" name="email" default="your@paypalemail.com" value="" size="55" label="RSM_DIBS_EMAIL" description="RSM_DIBS_EMAIL_DESC"/>
+		<param name="mode" type="radio" default="0" label="RSM_DIBS_MODE" description="RSM_DIBS_MODE_DESC">
+			<option value="0">RSM_DIBS_MODE_TEST</option>
+			<option value="1">RSM_DIBS_MODE_LIVE</option>
+		</param>
+		<param name="tax_type" type="radio" default="0" label="RSM_TAX_TYPE" description="RSM_TAX_TYPE_DESC">
+			<option value="0">RSM_TAX_PERCENT</option>
+			<option value="1">RSM_TAX_FIXED</option>
+		</param>
+		<param type="text" name="tax_value" default="0" value="" cols="55" rows="10" label="RSM_TAX_VALUE" description="RSM_TAX_VALUE_DESC"/>
+		<param type="text" name="cancel_return" default="" value="" size="55" label="RSM_DIBS_CANCEL_URL" description="RSM_DIBS_CANCEL_URL_DESC"/>
+		<param name="message_type" type="radio" default="0" label="RSM_MESSAGE_TYPE" description="RSM_MESSAGE_TYPE_DESC">
+			<option value="0">RSM_MESSAGE_TYPE_PURCHASE</option>
+			<option value="1">RSM_MESSAGE_TYPE_MEMBERSHIP</option>
+		</param>
+	</params>
+	
+	<config>
+            <fields name="params">
+                <fieldset name="basic">
+                    <field 
+                        type="text" 
+                        name="merchant" 
+                        default="" 
+                        value="" 
+                        size="55" 
+                        label="RSM_DIBS_MERCHANT" 
+                        description="RSM_DIBS_MERCHANT_DESC"
+                    />
+                    <field 
+                        name="mode" 
+                        type="radio" 
+                        default="0" 
+                        label="RSM_DIBS_MODE" 
+                        description="RSM_DIBS_MODE_DESC"
+                    >
+                        <option value="0">RSM_DIBS_MODE_TEST</option>
+                        <option value="1">RSM_DIBS_MODE_LIVE</option>
+                    </field>
+                    <field 
+                        name="lang" 
+                        type="select" 
+                        default="sv" 
+                        label="RSM_DIBS_LANG" 
+                        description="RSM_DIBS_LANG_DESC"
+                    >
+                        <option value="sv">RSM_DIBS_LANG_SV</option>
+                    </field>
+                    <field 
+                        type="password" 
+                        name="md5key1" 
+                        default="" 
+                        value="" 
+                        size="55" 
+                        label="RSM_DIBS_MD5KEY1" 
+                        description="RSM_DIBS_MD5KEY1_DESC"
+                    />
+                    <field 
+                        type="password" 
+                        name="md5key2" 
+                        default="" 
+                        value="" 
+                        size="55" 
+                        label="RSM_DIBS_MD5KEY2" 
+                        description="RSM_DIBS_MD5KEY2_DESC"
+                    />
+                    <field 
+                        name="tax_type" 
+                        type="radio" 
+                        default="0" 
+                        label="RSM_TAX_TYPE" 
+                        description="RSM_TAX_TYPE_DESC"
+                    >
+                            <option value="0">RSM_TAX_PERCENT</option>
+                            <option value="1">RSM_TAX_FIXED</option>
+                    </field>
+                    <field 
+                        type="text" 
+                        name="tax_value" 
+                        default="0" 
+                        value="" 
+                        cols="55" 
+                        rows="10" 
+                        label="RSM_TAX_VALUE" 
+                        description="RSM_TAX_VALUE_DESC"
+                    />
+                    <field 
+                        type="text" 
+                        name="cancel_return" 
+                        default="" 
+                        value="" 
+                        size="55" 
+                        label="RSM_DIBS_CANCEL_URL" 
+                        description="RSM_DIBS_CANCEL_URL_DESC"
+                    />
+                    <field 
+                        name="message_type" 
+                        type="radio" 
+                        default="0" 
+                        label="RSM_MESSAGE_TYPE" 
+                        description="RSM_MESSAGE_TYPE_DESC"
+                    >
+                            <option value="0">RSM_MESSAGE_TYPE_PURCHASE</option>
+                            <option value="1">RSM_MESSAGE_TYPE_MEMBERSHIP</option>
+                    </field>
+                </fieldset>
+            </fields>
+	</config>
+</install>
