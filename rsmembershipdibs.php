@@ -9,6 +9,9 @@
  * @copyright  (C) 2013-feb-23 Stilero Webdesign (www.stilero.com)
  * @license	GNU General Public License version 2 or later.
  * @link http://www.stilero.com
+ * 
+ * Test Param:
+ localhost/joomla_svn/index.php?orderid=1361725491&paytype=VISA%28SE%29&accepturl=http%3A%2F%2Fwww%2Ephp%2Dprogrammering%2Ese%2Findex%2Ephp%3Foption%3Dcom%5Frsmembership%26task%3Dthankyou%26dibspayment%3D1&acquirerlang=sv&agreement=5396496&amount=10000&callbackurl=http%3A%2F%2Fwww%2Ephp%2Dprogrammering%2Ese%2Findex%2Ephp%3Foption%3Dcom%5Frsmembership%26dibspayment%3D1&cancelurl=https%3A%2F%2Fpayment%2Earchitrade%2Ecom%2Fpaymentweb%2Freply%2Eaction&currency=752&declineurl=https%3A%2F%2Fpayment%2Earchitrade%2Ecom%2Fpaymentweb%2Freply%2Eaction&delivery1.Email=entimme%40stilero%2Ecom&delivery2.Name=Daniel%20Eliasson&delivery3.Address=Tranb%E4rsv%E4gen%2052%20%2C44837%20Floda&dibsmd5=e6f5678883161a19c8bac84bfa3a7b4d&flexwin_cardlogosize=1&fullreply=1&ip=81%2E235%2E197%2E91&lang=sv&merchant=90150391&newDIBSTransactionID=695336505&newDIBSTransactionIDVerification=78fe18ba43e72385259e88ba80974f918f3aa5b5f4dc8382dd91292423dfaf3a&ordline0-1=description&ordline0-2=price&ordline1-1=%C5rsmedlemskap&ordline1-2=100&posty! pe=ssl&rscurrency=SEK&test=yes&textreply=1&uniqueoid=7f05b0e0a6998fa0739c671b612164db&option=com%5Frsmembership&dibspayment=1&approvalcode=123456&statuscode=2&transact=695336505&authkey=6fca43e4bdf9c80b0530b7e3aa726f9f
  */
 
 defined('_JEXEC') or die('Restricted access');
@@ -28,6 +31,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
     const MESSAGE_TYPE_STANDARD = 0;
     const MESSAGE_TYPE_MEMBERSHIPNAME = 1;
     const PAYMENT_URL_LIVE = 'https://payment.architrade.com/paymentweb/start.action';
+    const IS_DEBUGGING_RSDIBS = TRUE;
     protected $inputs = array();
     
     /**
@@ -99,9 +103,9 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $zip = $userData->fields['zip'];
         $fullAdress = $adress.' ,'.$zip.' '.$city;
         $price = $transaction->price;
-        $currency = $transaction->currency;
+        //$currency = $transaction->currency;
         $membershipName = $membership->name;
-        $membershipSku = $membership->sku == '' ? 'medl' : $membership->sku;
+        //$membershipSku = $membership->sku == '' ? 'medl' : $membership->sku;
         $html = '<input type="hidden" name="delivery1.Email" value="'.htmlentities($email, ENT_COMPAT, 'UTF-8').'" />';
         $html .= '<input type="hidden" name="delivery2.Name" value="'.htmlentities($name, ENT_COMPAT, 'UTF-8').'" />';
         $html .= '<input type="hidden" name="delivery3.Address" value="'.htmlentities($fullAdress, ENT_COMPAT, 'UTF-8').'" />';
@@ -152,7 +156,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $html .= $this->orderDetails($transaction, $membership);
         $html .= '<input type="hidden" name="rscurrency" value="'.htmlentities(RSMembershipHelper::getConfig('currency'), ENT_COMPAT, 'UTF-8').'" />';
         $html .= '<input type="hidden" name="currency" value="752" />';
-        $html .= '<input type="hidden" name="amount" value="'.$this->_convertNumber($transaction->price).'" />';
+        $html .= '<input type="hidden" name="amount" value="'.$this->_convertNumberForDIBS($transaction->price).'" />';
         if ($db_membership->activation == 1){
             $html .= '<input type="hidden" name="callbackurl" value="'.JRoute::_(JURI::root().'index.php?option=com_rsmembership&dibspayment=1').'" />';
         }elseif ($db_membership->activation == 2){
@@ -196,14 +200,13 @@ class plgSystemRSMembershipDibs extends JPlugin{
      * @global type $mainframe
      * @return none
      */
-    public function onAfterRender(){
-        global $mainframe;
-        $logMail = 'daniel@stilero.com';
-        $logFrom = 'info@php-programmering.se';
-        $app =& JFactory::getApplication();		
+    //public function onAfterRender(){
+    public function onAfterInitialise(){
+        //global $mainframe;
+        $app =& JFactory::getApplication();
         if($app->getName() != 'site') return;
-        $dibsPayment = JRequest::getVar('dibspayment', '');
-        if ($dibsPayment != ''){
+        $dibsPayment = JRequest::getVar('dibspayment');
+        if ($dibsPayment == '1'){
             $this->onPaymentNotification();
         }
     }
@@ -227,7 +230,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
      * @return bool True on success, false on fail
      */
     private function isMd5Valid($transId, $amount, $currency, $authkey){
-        $md5key = $this->calcMd5($transId, $amount, $currency, $authkey);
+        $md5key = $this->calcMd5($transId, $amount, $currency);
         if($authkey == $md5key){
             return TRUE;
         }else{
@@ -244,11 +247,31 @@ class plgSystemRSMembershipDibs extends JPlugin{
      * @param string $authkey The MD5 received from DIBS
      * @return bool True on success, false on fail
      */
-    private function calcMd5($transId, $amount, $currency, $authkey){
+    private function calcMd5($transId, $amount, $currency){
         $key1 = $this->_params->get('md5key1');
         $key2 = $this->_params->get('md5key2');
         $md5key = md5($key2.md5($key1.'transact='.$transId.'&amount='.$amount.'&currency='.$currency));
         return $md5key;
+    }
+    
+    /**
+     * Method outputs debug info when activated
+     * @param string $debugInfo
+     */
+    private function debug($debugInfo, $method = 'NO METHOD SPECIFIED'){
+        if(self::IS_DEBUGGING_RSDIBS){
+            print 'METHOD: '.$method.'</ br>';
+            if(is_string($debugInfo)){
+                print '<pre>';
+                print $debugInfo;
+                print '</pre>';
+            }else{
+                print '<pre>';
+                var_dump($debugInfo);
+                print '</pre>';
+            }
+            print '</ br>';
+        }
     }
     
     /**
@@ -263,6 +286,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $query->where('custom = '.$this->_db->Quote($custom));
         $query->where('gateway ='.$this->_db->Quote('Dibs'));
         $this->_db->setQuery($query);
+        $this->debug($query->dump(), __FUNCTION__);
         $transaction = $this->_db->loadObject();
         return $transaction;
     }
@@ -279,6 +303,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $query->where('hash = '.$this->_db->Quote($hash));
         $query->where('gateway ='.$this->_db->Quote('Dibs'));
         $this->_db->setQuery($query);
+        $this->debug($query->dump(), __FUNCTION__);
         $transaction = $this->_db->loadObject();
         if(!$transaction){
             return FALSE;
@@ -294,8 +319,9 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $query =& $this->_db->getQuery(TRUE);
         $query->select('id, user_id, membership_id');
         $query->from('#__rsmembership_membership_users');
-        $query->where('from_transaction_id = '.(int)$this->_db->Quote($transId));
+        $query->where('from_transaction_id = '.(int)$transId);
         $this->_db->setQuery($query);
+        $this->debug($query->dump(), __FUNCTION__);
         $membership = $this->_db->loadObject();
         return $membership;
     }
@@ -320,11 +346,11 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $date = JFactory::getDate();
         $transaction->date = $date->toUnix();
         $transaction->ip = $_SERVER['REMOTE_ADDR'];
-        $transaction->price = $amount;
+        $transaction->price = $this->_convertNumberFromDIBS($amount);
         $transaction->currency = RSMembershipHelper::getConfig('currency');
         $transaction->hash = '';
         $transaction->gateway = 'Dibs';
-        $transaction->status = 'pending';
+        $transaction->status = 'completed';
         $transaction->store();
         RSMembership::finalize($transaction->id);
     }
@@ -336,7 +362,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
      * @return bool True on success, false on fail.
      */
     private function isPaymentAdequate($transactionPrice, $paymentAmount){
-        $price = $this->_convertNumber($transactionPrice);
+        $price = $this->_convertNumberForDIBS($transactionPrice);
         if ($paymentAmount >= $price){
             return TRUE;
         }else{
@@ -366,8 +392,9 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $query =& $this->_db->getQuery(TRUE);
         $query->update('#__rsmembership_transactions');
         $query->set('hash = '.$this->_db->Quote($hash));
-        $query->where('id = '.(int)$this->_db->Quote($transId));
+        $query->where('id = '.(int)$transId);
         $this->_db->setQuery($query);
+        $this->debug($query->dump(), __FUNCTION__);
         $this->_db->query();
     }
     
@@ -380,18 +407,25 @@ class plgSystemRSMembershipDibs extends JPlugin{
             return;
         }
         $log = array();
+        $deny = FALSE;
         $authkey = JRequest::getVar('authkey');
         $dibsTransId = JRequest::getVar('transact');
         $amount = JRequest::getVar('amount');
         $currency = JRequest::getVar('currency');
-        $rscurrency = JRequest::getVar('rscurrency');
-        $orderId = JRequest::getVar('orderid');
+        //$rscurrency = JRequest::getVar('rscurrency');
+        //$orderId = JRequest::getVar('orderid');
         $custom = JRequest::getVar('uniqueoid');
-        $email = JRequest::getVar('delivery1.Email');
+        //$email = JRequest::getVar('delivery1.Email');
         $status = JRequest::getVar('statuscode');
         $isSuspectedFraud = JRequest::getBool('suspect');
-        $isTransactionValid = $this->isMd5Valid($dibsTransId, $amount, $currency, $authkey);
-        $rsTransId = $this->getTransactionFromCustom($custom)->id;
+        if(self::IS_DEBUGGING_RSDIBS){
+            $isTransactionValid = TRUE;
+        }  else {
+            $isTransactionValid = $this->isMd5Valid($dibsTransId, $amount, $currency, $authkey);
+        }
+        
+        $transFromCust = $this->getTransactionFromCustom($custom);
+        $rsTransId = $transFromCust->id;
         $log[] = "DIBS reported a valid transaction.";
         $log[] = "Payment status is ".(!empty($status) ? $status : 'empty').".";
         $log[] = "Adding new payment...";
@@ -413,6 +447,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
                     $membership = $this->getMembershipFromTransId($transaction->id);
                     if (!empty($membership)){
                         $this->addRecurring($membership, $transaction, $amount);
+                        RSMembership::approve($transaction->id);
                         $log[] = "Successfully added the recurring transaction to the database.";
                     }else{
                         $log[] = "Could not identify the original transaction for this recurring payment.";
@@ -420,15 +455,15 @@ class plgSystemRSMembershipDibs extends JPlugin{
                 }else{
                     if($this->isPaymentAdequate($transaction->price, $amount)){
                         if($this->isCurrencyCorrect($currency)){
-                            $this->updateHashOnTransaction($dibsTransId, $transaction->id);
-                            RSMembership::approve($transaction->id);
+                            $this->updateHashOnTransaction($dibsTransId, $rsTransId);
+                            RSMembership::approve($rsTransId);
                             $log[] = "Successfully added the payment to the database.";
                         }else{
-                            $log[] = "Expected a currency of 752. PayPal reports this payment is made in $currency. Stopping.";
+                            $log[] = "Expected a currency of 752. DIBS reports this payment is made in $currency. Stopping.";
                             $deny  = true;
                         }
                     }else{
-                        $log[] = "Expected an amount of $transaction->price. PayPal reports this payment is $amount. Stopping.";
+                        $log[] = "Expected an amount of $transaction->price. DIBS reports this payment is $amount. Stopping.";
                         $deny  = true;
                     }
                 }
@@ -441,8 +476,11 @@ class plgSystemRSMembershipDibs extends JPlugin{
         if ($rsTransId){
             RSMembership::saveTransactionLog($log, $rsTransId);
             if ($deny){
-                RSMembership::deny($transaction_id);
+                RSMembership::deny($rsTransId);
             }
+        }
+        if(self::IS_DEBUGGING_RSDIBS){
+            exit;
         }
     }
     
@@ -451,8 +489,20 @@ class plgSystemRSMembershipDibs extends JPlugin{
      * @param float $number
      * @return int A converted int number.
      */
-    protected function _convertNumber($number){
+    protected function _convertNumberForDIBS($number){
         $convertedNumber = number_format(((float)($number)), 2, '', '');
+        return $convertedNumber;
+    }
+    
+    /**
+     * Converts a DIBS number to a regular float number
+     * @param string $number
+     * @return float A converted float number.
+     */
+    protected function _convertNumberFromDIBS($number){
+        $oeren = substr($number, strlen($number)-3, 2);
+        $kronor = substr($number, 0, strlen($number)-2);
+        $convertedNumber = (float)$kronor.'.'.$oeren;
         return $convertedNumber;
     }
 
