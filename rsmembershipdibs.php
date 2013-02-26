@@ -31,7 +31,7 @@ class plgSystemRSMembershipDibs extends JPlugin{
     const MESSAGE_TYPE_STANDARD = 0;
     const MESSAGE_TYPE_MEMBERSHIPNAME = 1;
     const PAYMENT_URL_LIVE = 'https://payment.architrade.com/paymentweb/start.action';
-    const IS_DEBUGGING_RSDIBS = TRUE;
+    const IS_DEBUGGING_RSDIBS = FALSE;
     protected $inputs = array();
     
     /**
