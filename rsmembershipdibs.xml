@@ -7,7 +7,7 @@
 	<license>GPLv2.0</license>
 	<authorEmail>joomla@stilero.com</authorEmail>
 	<authorUrl>www.stilero.com</authorUrl>
-	<version>1.0.0</version>
+	<version>1.1</version>
 	<description>RSM_DIBS_PLUGIN_DESC</description>
 	<files>
 		<filename plugin="rsmembershipdibs">rsmembershipdibs.php</filename>
@@ -32,6 +32,16 @@
 			<option value="0">RSM_MESSAGE_TYPE_PURCHASE</option>
 			<option value="1">RSM_MESSAGE_TYPE_MEMBERSHIP</option>
 		</param>
+                <param 
+                        name="capture_now" 
+                        type="radio" 
+                        default="0" 
+                        label="RSM_CAPTURE_NOW" 
+                        description="RSM_CAPTURE_NOW_DESC"
+                    >
+                            <option value="0">NO</option>
+                            <option value="1">YES</option>
+                    </param>
 	</params>
 	
 	<config>
@@ -121,6 +131,16 @@
                     >
                             <option value="0">RSM_MESSAGE_TYPE_PURCHASE</option>
                             <option value="1">RSM_MESSAGE_TYPE_MEMBERSHIP</option>
+                    </field>
+                    <field 
+                        name="capture_now" 
+                        type="radio" 
+                        default="0" 
+                        label="RSM_CAPTURE_NOW" 
+                        description="RSM_CAPTURE_NOW_DESC"
+                    >
+                            <option value="0">NO</option>
+                            <option value="1">YES</option>
                     </field>
                 </fieldset>
             </fields>

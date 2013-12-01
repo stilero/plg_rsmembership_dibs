@@ -156,6 +156,9 @@ class plgSystemRSMembershipDibs extends JPlugin{
         $html .= $this->orderDetails($transaction, $membership);
         $html .= '<input type="hidden" name="rscurrency" value="'.htmlentities(RSMembershipHelper::getConfig('currency'), ENT_COMPAT, 'UTF-8').'" />';
         $html .= '<input type="hidden" name="currency" value="752" />';
+        if ($this->_params->get('capture_now')){
+            $html .= '<input type="hidden" name="capturenow" value="yes" />';
+        }
         $html .= '<input type="hidden" name="amount" value="'.$this->_convertNumberForDIBS($transaction->price).'" />';
         if ($db_membership->activation == 1){
             $html .= '<input type="hidden" name="callbackurl" value="'.JRoute::_(JURI::root().'index.php?option=com_rsmembership&dibspayment=1').'" />';
